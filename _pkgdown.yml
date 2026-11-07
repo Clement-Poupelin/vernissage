@@ -18,7 +18,7 @@ navbar:
   components:
     website:
       icon: fa-house
-            href: https://clement-poupelin.github.io/packages/vernissage.html
+      href: https://clement-poupelin.github.io/packages/vernissage.html
       aria-label: Other packages on the author website
 
 reference:
