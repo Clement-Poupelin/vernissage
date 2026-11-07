@@ -1,0 +1,66 @@
+---
+title: "Tables and Quarto reports"
+vignette: >
+  %\VignetteIndexEntry{Tables and Quarto reports}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: "#>"
+    fig.width: 8
+    fig.height: 5
+    out.width: "100%"
+---
+
+```{r setup}
+library(vernissage)
+```
+
+## Formatting numbers
+
+```{r}
+fmt_p(c(0.21, 0.031, 0.00042, 1e-20))
+fmt_num(c(1.2345, 0.00002, 2.5e7), digits = 2)
+fmt_stars(c(0.2, 0.07, 0.03, 0.004))
+```
+
+## Publication tables
+
+`gt_pub()` rounds numbers, detects and formats p-value columns, and puts
+p < 0.05 in bold. `gt_signif()` adds shades of green for nominal and
+FDR-significant results.
+
+```{r gt}
+cm <- cor_matrix_test(cohort_sim, c(NFL_V0, IL6_V0, CRP_V0, MOCA_V0, UPDRS_V0))
+gt_pub(cm$long, title = "Spearman correlations", note = "Pairwise complete observations") |>
+  gt_signif(p_cols = "p", fdr_cols = "p_adj")
+```
+
+Interactive tables with export buttons:
+
+```{r dt, eval = rlang::is_installed("DT")}
+dt_export(na_summary(cohort_sim, list(All = names(cohort_sim))))
+```
+
+## Quarto tabsets and callouts
+
+In a Quarto report, a chunk with `#| results: asis` can print a named list of
+figures and tables as tabs, and raw console output in a collapsed callout:
+
+````markdown
+```{r}
+#| results: asis
+qmd_tabset(list(
+  Distribution = plot_distribution(cohort_sim, NFL_V0, group = GROUP),
+  Normality    = describe_normality(cohort_sim, c(NFL_V0, CRP_V0))
+))
+qmd_callout_raw(`Linear model` = summary(lm(MOCA_V0 ~ AGE, data = cohort_sim)))
+```
+````
+
+The Markdown they write:
+
+```{r}
+qmd_tabset(list(First = "Some text", Second = "Other text"))
+```

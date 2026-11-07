@@ -1,0 +1,86 @@
+---
+title: "Figures"
+vignette: >
+  %\VignetteIndexEntry{Figures}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: "#>"
+    fig.width: 9
+    fig.height: 5.5
+    out.width: "100%"
+---
+
+```{r setup}
+library(vernissage)
+library(ggplot2)
+labs <- c(NFL_V0 = "NfL", MOCA_V0 = "MoCA", UPDRS_V0 = "UPDRS-III", CRP_V0 = "CRP", SEX = "Sex",
+          GROUP = "Arm", AGE = "Age", BMI = "BMI", IL6_V0 = "IL-6", NFL = "NfL", MOCA = "MoCA",
+          UPDRS = "UPDRS-III")
+```
+
+## Theme and palettes
+
+Every figure uses `theme_pub()` and the colour-blind safe Okabe-Ito palette.
+
+```{r theme}
+ggplot(cohort_sim, aes(AGE, NFL_V0, colour = GROUP)) +
+  geom_point() +
+  scale_colour_manual(values = pal_levels(levels(cohort_sim$GROUP))) +
+  labs(title = "NfL by age", subtitle = "Baseline") +
+  theme_pub()
+```
+
+## Distributions
+
+Continuous variables get a density, jittered points and a boxplot; integer
+scores a histogram with bin width 1; categorical variables a bar chart.
+Outliers are coloured by the rule that flags them, and a group test is given
+for each panel.
+
+```{r dist, fig.height = 6}
+p <- plot_distribution(cohort_sim, c(NFL_V0, MOCA_V0, SEX), group = GROUP, labels = labs,
+                       outlier_mad = TRUE)
+p
+attr(p, "tests")
+```
+
+Display transformation and reference lines:
+
+```{r dist-log}
+plot_distribution(cohort_sim, CRP_V0, transform = "log", labels = labs,
+                  ref_lines = list(CRP_V0 = log(5)), ref_label = "log(5 mg/L)")
+```
+
+## Paired visits
+
+```{r paired, fig.height = 4.5}
+plot_paired_visits(cohort_sim, c(NFL_V0, MOCA_V0, UPDRS_V0), id_col = ID, labels = labs)
+plot_paired_visits(cohort_sim, NFL_V0, id_col = ID, labels = labs, transitions = TRUE)
+```
+
+```{r trajectories, fig.height = 4.5}
+plot_trajectory_grid(cohort_sim, c("NFL", "MOCA", "UPDRS"), id_col = ID, group = GROUP, labels = labs)
+plot_delta_vs_baseline(cohort_sim, c("NFL", "MOCA", "UPDRS"), labels = labs)
+```
+
+## Radar plot
+
+```{r radar, fig.height = 7}
+plot_radar(cohort_sim, c(AGE, BMI, NFL_V0, IL6_V0, MOCA_V0, UPDRS_V0, SEX), group = GROUP,
+           labels = labs, normalize = "zscore", quali_levels = list(SEX = "Female"), seed = 1)
+```
+
+## Forest plot
+
+`plot_forest()` draws any table of estimates with their confidence intervals
+and p-values, e.g. results computed elsewhere.
+
+```{r forest, fig.height = 3.5}
+est <- data.frame(label = c("NfL", "IL-6", "CRP"), estimate = c(0.42, -0.08, 0.15),
+                  conf.low = c(0.12, -0.38, -0.12), conf.high = c(0.72, 0.22, 0.42),
+                  p.value = c(0.006, 0.6, 0.27), p_adj = c(0.018, 0.6, 0.4))
+plot_forest(est, p_adj = p_adj, effect_label = "β", title = "Effect per SD on the MoCA")
+```

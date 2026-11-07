@@ -1,0 +1,92 @@
+---
+title: "Getting started with vernissage"
+vignette: >
+  %\VignetteIndexEntry{Getting started with vernissage}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: "#>"
+    fig.width: 8
+    fig.height: 5
+    out.width: "100%"
+---
+
+*vernissage* puts your cohort on show: it turns raw cohort data into clean
+variables, then into publication-ready figures and tables. It is built for clinical cohorts stored in
+**wide format**: one row per subject, one column per variable and visit, with
+names following the `<ROOT>_<VISIT>` convention (`NFL_V0`, `NFL_V3`).
+
+```{r setup}
+library(vernissage)
+```
+
+## The example cohort
+
+Every vignette uses `cohort_sim`, a simulated cohort of 120 subjects in two
+arms, measured at baseline (`_V0`) and follow-up (`_V3`). It has the usual
+difficulties of real data: skewed biomarkers, values piled at a limit of
+detection, outliers, bounded scores and missing values.
+
+```{r}
+str(cohort_sim)
+```
+
+## A first look in three lines
+
+```{r first-table, eval = rlang::is_installed("gt")}
+describe_cohort(cohort_sim, vars = c(AGE, SEX, BMI, NFL_V0, IL6_V0, CRP_V0, MOCA_V0, FALL_V0),
+                by = GROUP, id_col = ID,
+                blocks = list(Demography = c("AGE", "SEX", "BMI"),
+                              Biomarkers = c("NFL_V0", "IL6_V0", "CRP_V0"),
+                              Clinical = c("MOCA_V0", "FALL_V0")))
+```
+
+```{r first-na, fig.height = 6}
+plot_na_map(cohort_sim, vars = c(NFL_V0:PUT_R_V3), id_col = ID)
+```
+
+```{r first-dist}
+plot_distribution(cohort_sim, c(NFL_V0, MOCA_V0, SEX), group = GROUP)
+```
+
+## Families of functions
+
+Function names share a prefix by family, so that autocompletion lists the
+family:
+
+| Prefix | Purpose | Vignette |
+|---|---|---|
+| `read_cohort_csv()`, `clean_colnames()`, `rename_with_map()` | import and names | Preprocessing |
+| `visit_*()` | visit suffixes, long format, changes | Preprocessing |
+| `outlier_*()` | robust outlier rules | Preprocessing |
+| `transform_*()` | log, Box-Cox... | Preprocessing |
+| `describe_*()`, `na_*()`, `cor_*()`, `pca_*()` | description | Describing a cohort |
+| `plot_*()`, `theme_*()`, `pal_*()` | figures | Figures |
+| `fmt_*()`, `label_*()`, `gt_*()`, `qmd_*()` | formatting and reports | Tables and reports |
+
+## Selecting columns
+
+Every argument that takes columns accepts character vectors (directly or
+through a variable), bare names or tidyselect helpers:
+
+```{r}
+vars <- c("NFL_V0", "IL6_V0")
+nrow(outlier_detect(cohort_sim, vars, id_col = ID))
+nrow(outlier_detect(cohort_sim, c(NFL_V0, IL6_V0), id_col = "ID"))
+nrow(outlier_detect(cohort_sim, tidyselect::ends_with("_V0") & tidyselect::where(is.numeric), id_col = ID))
+```
+
+With a character vector, missing columns are dropped with a message; with
+bare names, an unknown column is an error.
+
+Limits of detection and cut-offs (median split, tertiles...) are in the
+companion package [lodestar](https://github.com/Clement-Poupelin/lodestar).
+
+## Former names
+
+The functions come from analysis scripts. Their former names (`get_label()`,
+`paired_visits_plot()`, `radar_plot()`...) still work and point to the new
+ones; see `?vernissage-deprecated`. The former limit-of-detection and
+cut-off functions (`make_cuts()`, `handle_lod()`...) are in lodestar.

@@ -1,0 +1,52 @@
+url: https://clement-poupelin.github.io/vernissage/
+template:
+  bootstrap: 5
+
+reference:
+  - title: Import and names
+    contents:
+      - read_cohort_csv
+      - path_resolve_nfc
+      - clean_colnames
+      - rename_with_map
+      - catalog_vars
+  - title: Visits
+    contents:
+      - starts_with("visit_")
+      - combine_bilateral
+  - title: Outliers
+    contents:
+      - starts_with("outlier_")
+  - title: Transformations
+    contents:
+      - starts_with("transform_")
+  - title: Description
+    contents:
+      - describe_cohort
+      - describe_normality
+      - starts_with("na_")
+      - starts_with("cor_")
+      - starts_with("pca_")
+      - score_composite
+  - title: Figures
+    contents:
+      - starts_with("plot_")
+      - theme_pub
+      - theme_rotate_x
+      - starts_with("pal_")
+  - title: Formatting and labels
+    contents:
+      - starts_with("fmt_")
+      - starts_with("label_")
+  - title: Tables and Quarto
+    contents:
+      - starts_with("gt_")
+      - dt_export
+      - starts_with("qmd_")
+  - title: Data
+    contents:
+      - cohort_sim
+  - title: internal
+    contents:
+      - vernissage-deprecated
+      - vernissage-package

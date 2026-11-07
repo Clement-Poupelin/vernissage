@@ -1,0 +1,97 @@
+---
+title: "Describing a cohort"
+vignette: >
+  %\VignetteIndexEntry{Describing a cohort}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: "#>"
+    fig.width: 8
+    fig.height: 5
+    out.width: "100%"
+---
+
+```{r setup}
+library(vernissage)
+labs <- c(AGE = "Age (years)", BMI = "BMI", SEX = "Sex", NFL_V0 = "NfL V0", IL6_V0 = "IL-6 V0",
+          CRP_V0 = "CRP V0", MOCA_V0 = "MoCA V0", UPDRS_V0 = "UPDRS-III V0", FALL_V0 = "Falls V0",
+          GROUP = "Arm")
+```
+
+## The cohort overview table
+
+`describe_cohort()` is the first table of an analysis: type, number observed,
+missing values, summaries overall and by group, a group comparison and a
+small histogram of each variable.
+
+```{r overview, eval = rlang::is_installed("gt")}
+describe_cohort(cohort_sim,
+                vars = c(AGE, SEX, BMI, NFL_V0, IL6_V0, CRP_V0, MOCA_V0, UPDRS_V0, FALL_V0),
+                by = GROUP, id_col = ID, labels = labs,
+                blocks = list(Demography = c("AGE", "SEX", "BMI"),
+                              Biomarkers = c("NFL_V0", "IL6_V0", "CRP_V0"),
+                              Clinical = c("MOCA_V0", "UPDRS_V0", "FALL_V0")))
+```
+
+The same content is available as a tibble with `output = "data"`.
+
+## Missing data
+
+```{r na}
+na_summary(cohort_sim, list(Biomarkers = c("NFL_V0", "NFL_V3", "IL6_V3", "CRP_V0"),
+                            Scores = c("MOCA_V3", "UPDRS_V3")))
+na_complete_cases(cohort_sim, list(Baseline = c("NFL_V0", "IL6_V0", "CRP_V0", "MOCA_V0"),
+                                   `Both visits` = c("NFL_V0", "NFL_V3", "MOCA_V0", "MOCA_V3")))
+```
+
+```{r na-map, fig.height = 6}
+plot_na_map(cohort_sim, c(NFL_V0:PUT_R_V3), id_col = ID, orientation = "rows")
+```
+
+## Normality
+
+```{r}
+describe_normality(cohort_sim, c(AGE, BMI, NFL_V0, IL6_V0, CRP_V0, MOCA_V0), labels = labs)
+```
+
+```{r overview-plot}
+plot_distribution_overview(cohort_sim, c(AGE, BMI, NFL_V0, IL6_V0, CRP_V0, MOCA_V0, UPDRS_V0), labels = labs)
+```
+
+## Correlations
+
+```{r cor, fig.height = 6}
+cm <- cor_matrix_test(cohort_sim, c(AGE, BMI, NFL_V0, IL6_V0, CRP_V0, MOCA_V0, UPDRS_V0))
+plot_cor_heatmap(cm, labels = labs)
+```
+
+Partial correlations, adjusted for age and sex:
+
+```{r cor-cross}
+cc <- plot_cor_cross(cohort_sim, c(NFL_V0, IL6_V0, CRP_V0), c(MOCA_V0, UPDRS_V0),
+                     covariates = c(AGE, SEX), labels = labs)
+cc$plot
+```
+
+## Principal component analysis
+
+```{r pca}
+pc <- pca_compute(cohort_sim, c(AGE, BMI, NFL_V0, IL6_V0, CRP_V0, MOCA_V0, UPDRS_V0), id_col = ID,
+                  impute = "median")
+plot_pca_scree(pc)
+plot_pca_ind(pc, cohort_sim, id_col = ID, color_var = GROUP, labels = labs)
+plot_pca_var(pc, labels = labs, groups = list(Biomarkers = c("NFL_V0", "IL6_V0", "CRP_V0"),
+                                              Clinical = c("MOCA_V0", "UPDRS_V0")))
+plot_pca_contrib(pc, axes = 1:2, labels = labs)
+```
+
+## Changes between visits
+
+```{r paired, fig.height = 4.5}
+plot_paired_visits(cohort_sim, c(NFL_V0, MOCA_V0), id_col = ID, labels = labs, transitions = TRUE)
+```
+
+The reclassification table of categorised variables between visits is
+`lodestar::cut_transition_table()`.

@@ -1,0 +1,120 @@
+---
+title: "Preprocessing: from raw files to analysis variables"
+vignette: >
+  %\VignetteIndexEntry{Preprocessing: from raw files to analysis variables}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: "#>"
+    fig.width: 8
+    fig.height: 5
+    out.width: "100%"
+---
+
+```{r setup}
+library(vernissage)
+```
+
+The key rule for longitudinal data: **a transformation is decided at the
+reference visit (V0) and applied unchanged to the other visits**. Otherwise a V3 - V0 change mixes biology and a change of scale.
+
+## Import and names
+
+`read_cohort_csv()` reads CSV files exported by French spreadsheets
+(`;` separator, `,` decimals, Latin-1 encoding, codes such as `NR` or `ND`
+for missing values).
+
+```{r}
+f <- system.file("extdata", "cohort_messy.csv", package = "vernissage")
+raw <- read_cohort_csv(f)
+raw
+raw <- clean_colnames(raw)
+names(raw)
+map <- c("ID", "NFL_V0", "NFL_V3")
+names(map) <- names(raw)[c(1, 5, 6)]     # c(OLD = "NEW")
+map
+raw <- rename_with_map(raw, map)
+names(raw)
+```
+
+Unusual visit suffixes are mapped to the convention, and bilateral measures
+averaged:
+
+```{r}
+visit_map_suffix(c("MRI_GPI_L0", "MRI_GPI_L36"), select = "^MRI_")
+d <- combine_bilateral(cohort_sim, "PUT")
+head(d[, c("PUT_L_V0", "PUT_R_V0", "PUT_V0")])
+```
+
+A catalogue of the variables:
+
+```{r}
+catalog_vars(cohort_sim, list(Biomarkers = c("NFL", "IL6", "CRP"),
+                              Scores = c("MOCA", "UPDRS", "FALL"),
+                              Demography = c("AGE", "SEX", "BMI")))
+```
+
+## Outliers
+
+Two robust rules (see `?outlier_flag_mad`): the modified z-score
+(Iglewicz & Hoaglin) and Tukey's fences. A flag is a prompt to look, not a
+reason to delete.
+
+```{r}
+out <- outlier_detect(cohort_sim, c(NFL_V0, CRP_V0), id_col = ID, rule = "any")
+out
+masked <- outlier_mask(cohort_sim, out[out$MAD & out$IQR, ], id_col = ID)
+```
+
+## Transformations
+
+```{r}
+cmp <- transform_compare(cohort_sim, c(NFL_V0, IL6_V0, CRP_V0), methods = c("none", "log", "sqrt"))
+choice <- transform_choose(cmp)
+choice[, c("Variable", "Method", "skewness", "W", "Reason")]
+res <- transform_apply(cohort_sim, transform_propagate(choice))
+res$map
+```
+
+With the car package, `transform_boxcox()` uses car's documented rule
+(maximum-likelihood lambda and its rounded power), and
+`transform_boxcox_resid()` decides the transformation of a score on the
+residuals of `score ~ covariates`.
+
+```{r, eval = rlang::is_installed("car")}
+transform_boxcox(cohort_sim, c(NFL_V0, CRP_V0))[, c("Variable", "lambda_ml", "rounded", "Method", "Reason")]
+```
+
+## Labels of derived variables
+
+Labels of transformed, categorised or change variables follow from the
+labels of the roots:
+
+```{r}
+labs <- c(NFL = "NfL", IL6 = "IL-6", CRP = "CRP")
+label_expand(c("NFL_V0", "BIN_IL6_V0", "LOG_NFL_V3", "DELTA_NFL"), labs)
+label_expand("BIN_IL6_V0", labs, bin_format = "%s (tertiles)")
+```
+
+Limits of detection and cut-offs are handled by the companion package
+[lodestar](https://github.com/Clement-Poupelin/lodestar)
+(`lod_handle()`, `cut_compute()`, `cut_apply()`...).
+
+## Visits
+
+```{r}
+d <- visit_add_deltas(cohort_sim, c("NFL", "MOCA"))
+long <- visit_to_long(cohort_sim, c("NFL", "MOCA"), id_col = ID, keep = GROUP,
+                      time_values = c(V0 = 0, V3 = 36))
+head(long)
+```
+
+## Composite scores
+
+```{r}
+d <- score_composite(cohort_sim, list(inflammation = c("IL6_V0", "CRP_V0"),
+                                      motor = c("UPDRS_V0", "FALL_V0")))
+summary(d[, c("COMP_INFLAMMATION", "COMP_MOTOR")])
+```

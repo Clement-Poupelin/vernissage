@@ -1,0 +1,7 @@
+Numéro patient;Groupe;Sexe;Âge;NfL V0;NfL V3;Score MoCA V0;Commentaire
+P001;Placebo;F;64;12,4;13,1;27;RAS
+P002;Actif;M;71;18,9;NR;24;prélèvement hémolysé
+P003;Placebo;M;58;9,7;10,2;29;
+P004;Actif;F;66;.;14,8;26;NA
+P005;Actif;M;73;21,3;22,6;ND;patient fatigué
+P006;Placebo;F;61;11,0;11,5;28;
