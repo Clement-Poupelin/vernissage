@@ -1,6 +1,25 @@
 url: https://clement-poupelin.github.io/vernissage/
 template:
   bootstrap: 5
+  bootswatch: flatly
+  opengraph:
+    image:
+      src: man/figures/logo.png
+      alt: "lodestar hex logo"
+
+authors:
+  Clément Poupelin:
+    href: https://clement-poupelin.github.io/
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, website, github]
+  components:
+    website:
+      icon: fa-house
+            href: https://clement-poupelin.github.io/packages/vernissage.html
+      aria-label: Other packages on the author website
 
 reference:
   - title: Import and names
