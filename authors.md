@@ -2,7 +2,8 @@
 
 ## Authors
 
-- **Clément Poupelin**. Author, maintainer.
+- **[Clément Poupelin](https://clement-poupelin.github.io/)**. Author,
+  maintainer.
 
 ## Citation
 
