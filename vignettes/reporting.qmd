@@ -31,15 +31,17 @@ fmt_stars(c(0.2, 0.07, 0.03, 0.004))
 p < 0.05 in bold. `gt_signif()` adds shades of green for nominal and
 FDR-significant results.
 
-```{r gt}
+```{r gt, eval = rlang::is_installed("gt")}
 cm <- cor_matrix_test(cohort_sim, c(NFL_V0, IL6_V0, CRP_V0, MOCA_V0, UPDRS_V0))
 gt_pub(cm$long, title = "Spearman correlations", note = "Pairwise complete observations") |>
   gt_signif(p_cols = "p", fdr_cols = "p_adj")
 ```
 
-Interactive tables with export buttons:
+`dt_export()` gives an interactive table (column filters, CSV and Excel export
+buttons) in an HTML report. It is not run here: the documentation website
+cannot load its JavaScript.
 
-```{r dt, eval = rlang::is_installed("DT")}
+```{r dt, eval = FALSE}
 dt_export(na_summary(cohort_sim, list(All = names(cohort_sim))))
 ```
 
@@ -48,8 +50,7 @@ dt_export(na_summary(cohort_sim, list(All = names(cohort_sim))))
 In a Quarto report, a chunk with `#| results: asis` can print a named list of
 figures and tables as tabs, and raw console output in a collapsed callout:
 
-````markdown
-```{r}
+```{{r}}
 #| results: asis
 qmd_tabset(list(
   Distribution = plot_distribution(cohort_sim, NFL_V0, group = GROUP),
@@ -57,7 +58,6 @@ qmd_tabset(list(
 ))
 qmd_callout_raw(`Linear model` = summary(lm(MOCA_V0 ~ AGE, data = cohort_sim)))
 ```
-````
 
 The Markdown they write:
 
