@@ -19,7 +19,9 @@ jobs:
       matrix:
         config:
           - {os: macos-latest,   r: 'release'}
-          - {os: windows-latest, r: 'release'}
+          # vignettes (Quarto) not rebuilt on Windows: Quarto does not find the package being
+          # checked there; they are rebuilt on the 4 other configurations
+          - {os: windows-latest, r: 'release', skip-vignettes: true}
           - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
           - {os: ubuntu-latest,  r: 'release'}
           - {os: ubuntu-latest,  r: 'oldrel-1'}
@@ -49,4 +51,5 @@ jobs:
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
-          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+          build_args: ${{ matrix.config.skip-vignettes && 'c("--no-manual","--no-build-vignettes")' || 'c("--no-manual","--compact-vignettes=gs+qpdf")' }}
+          args: ${{ matrix.config.skip-vignettes && 'c("--no-manual","--as-cran","--ignore-vignettes")' || 'c("--no-manual","--as-cran")' }}
