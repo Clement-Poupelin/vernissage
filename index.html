@@ -14,7 +14,7 @@
 <meta name="description" content="Preparation, description and visualisation of clinical cohort data in wide format (one row per subject, one column per variable and visit). Reads French-style CSV files, cleans names, reshapes visits, flags outliers with documented robust rules, chooses and applies power transformations, and describes the cohort with publication-ready ggplot2 figures and gt tables (cohort overview, distributions, missing-data maps, correlations, principal component analysis, paired visits, trajectories, radar and forest plots).">
 <meta property="og:description" content="Preparation, description and visualisation of clinical cohort data in wide format (one row per subject, one column per variable and visit). Reads French-style CSV files, cleans names, reshapes visits, flags outliers with documented robust rules, chooses and applies power transformations, and describes the cohort with publication-ready ggplot2 figures and gt tables (cohort overview, distributions, missing-data maps, correlations, principal component analysis, paired visits, trajectories, radar and forest plots).">
 <meta property="og:image" content="https://clement-poupelin.github.io/vernissage/reference/figures/logo.png">
-<meta property="og:image:alt" content="lodestar hex logo">
+<meta property="og:image:alt" content="vernissage hex logo">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -60,10 +60,13 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="vernissage">vernissage<a class="anchor" aria-label="anchor" href="#vernissage"></a>
-</h1></div>
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="vernissage-">vernissage <a class="anchor" aria-label="anchor" href="#vernissage-"></a>
+</h1>
+</div>
 <!-- badges: start -->
 
+<p>Documentation: <a href="https://clement-poupelin.github.io/vernissage/" class="uri">https://clement-poupelin.github.io/vernissage/</a></p>
 <p><strong>Put your cohort on show.</strong> A <em>vernissage</em> is the opening of an exhibition, when the works are hung and shown at their best. This package prepares clinical cohort data and shows them: overview table, distributions, missing-data maps, paired visits, correlations, PCA, radar and forest plots, with a publication theme, colour-blind safe palettes and polished <code>gt</code> tables.</p>
 <p>Data are in <strong>wide format</strong> (one row per subject, one column per variable and visit, names such as <code>NFL_V0</code>, <code>NFL_V3</code>).</p>
 <ul>
@@ -114,36 +117,25 @@
 <p>Figures use Unicode symbols (rho, Delta, &gt;=). To keep them in a PDF, save with <code>ggsave("figure.pdf", p, device = cairo_pdf)</code>; the classic <code><a href="https://rdrr.io/r/grDevices/pdf.html" class="external-link">pdf()</a></code> device gets ASCII equivalents automatically (see <code><a href="reference/vernissage-package.html">?vernissage</a></code>, option <code>vernissage.unicode</code>).</p>
 </div>
 <div class="section level2">
-<h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>
+<h2 id="tutorials">Tutorials<a class="anchor" aria-label="anchor" href="#tutorials"></a>
 </h2>
 <ul>
 <li>
-<em>Getting started</em> (<code><a href="articles/vernissage.html">vignette("vernissage")</a></code>)</li>
-<li><em>Preprocessing: from raw files to analysis variables</em></li>
-<li><em>Describing a cohort</em></li>
-<li><em>Figures</em></li>
-<li><em>Tables and Quarto reports</em></li>
+<a href="https://clement-poupelin.github.io/vernissage/articles/vernissage.html">Getting started</a>: the example cohort, a first look, the families of functions</li>
+<li>
+<a href="https://clement-poupelin.github.io/vernissage/articles/preprocessing.html">Preprocessing</a>: import, names, visits, outliers, transformations</li>
+<li>
+<a href="https://clement-poupelin.github.io/vernissage/articles/describing.html">Describing a cohort</a>: overview table, missing data, correlations, PCA</li>
+<li>
+<a href="https://clement-poupelin.github.io/vernissage/articles/figures.html">Figures</a>: distributions, paired visits, trajectories, radar and forest plots</li>
+<li>
+<a href="https://clement-poupelin.github.io/vernissage/articles/reporting.html">Tables and Quarto reports</a>: formatting, <code>gt</code> tables, tabsets</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="coming-from-the-analysis-scripts">Coming from the analysis scripts<a class="anchor" aria-label="anchor" href="#coming-from-the-analysis-scripts"></a>
 </h2>
-<p>The former function names (<code><a href="reference/vernissage-deprecated.html">get_label()</a></code>, <code><a href="reference/vernissage-deprecated.html">paired_visits_plot()</a></code>, <code><a href="reference/vernissage-deprecated.html">radar_plot()</a></code>…) still work: they call the new function and give a deprecation warning. The correspondence table is in <code>?vernissage-deprecated</code> and in <code>NEWS.md</code>. The former limit-of-detection and cut-off functions (<code>handle_lod()</code>, <code>make_cuts()</code>, <code>binarize_vars()</code>…) are in lodestar.</p>
-</div>
-<div class="section level2">
-<h2 id="renaming-the-package">Renaming the package<a class="anchor" aria-label="anchor" href="#renaming-the-package"></a>
-</h2>
-<p>From a terminal at the package root (on macOS use <code>sed -i ''</code>):</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rl</span> <span class="st">"vernissage"</span> <span class="at">--exclude-dir</span><span class="op">=</span>.git . <span class="kw">|</span> <span class="fu">xargs</span> sed <span class="at">-i</span> <span class="st">'s/vernissage/newname/g'</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">git</span> mv R/vernissage-package.R R/newname-package.R</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">git</span> mv vignettes/vernissage.qmd vignettes/newname.qmd</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">git</span> mv vernissage.Rproj newname.Rproj</span></code></pre></div>
-<p>Check the result with <code>git diff</code>, rename the GitHub repository (<em>Settings &gt; General</em>; GitHub redirects the old address), update the remote (<code>git remote set-url origin https://github.com/Clement-Poupelin/newname.git</code>) and run <code>devtools::document()</code> and <code>devtools::check()</code>.</p>
-</div>
-<div class="section level2">
-<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
-</h2>
-<p>MIT</p>
+<p>The former function names (<code><a href="reference/vernissage-deprecated.html">get_label()</a></code>, <code><a href="reference/vernissage-deprecated.html">paired_visits_plot()</a></code>, <code><a href="reference/vernissage-deprecated.html">radar_plot()</a></code>…) still work, with a deprecation warning; see <code>?vernissage-deprecated</code>. The former limit-of-detection and cut-off functions are in <a href="https://github.com/Clement-Poupelin/lodestar" class="external-link">lodestar</a>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

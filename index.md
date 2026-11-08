@@ -1,5 +1,7 @@
 # vernissage
 
+Documentation: <https://clement-poupelin.github.io/vernissage/>
+
 **Put your cohort on show.** A *vernissage* is the opening of an
 exhibition, when the works are hung and shown at their best. This
 package prepares clinical cohort data and shows them: overview table,
@@ -81,14 +83,21 @@ equivalents automatically (see
 [`?vernissage`](https://clement-poupelin.github.io/vernissage/reference/vernissage-package.md),
 option `vernissage.unicode`).
 
-## Vignettes
+## Tutorials
 
-- *Getting started*
-  ([`vignette("vernissage")`](https://clement-poupelin.github.io/vernissage/articles/vernissage.md))
-- *Preprocessing: from raw files to analysis variables*
-- *Describing a cohort*
-- *Figures*
-- *Tables and Quarto reports*
+- [Getting
+  started](https://clement-poupelin.github.io/vernissage/articles/vernissage.html):
+  the example cohort, a first look, the families of functions
+- [Preprocessing](https://clement-poupelin.github.io/vernissage/articles/preprocessing.html):
+  import, names, visits, outliers, transformations
+- [Describing a
+  cohort](https://clement-poupelin.github.io/vernissage/articles/describing.html):
+  overview table, missing data, correlations, PCA
+- [Figures](https://clement-poupelin.github.io/vernissage/articles/figures.html):
+  distributions, paired visits, trajectories, radar and forest plots
+- [Tables and Quarto
+  reports](https://clement-poupelin.github.io/vernissage/articles/reporting.html):
+  formatting, `gt` tables, tabsets
 
 ## Coming from the analysis scripts
 
@@ -96,28 +105,6 @@ The former function names
 ([`get_label()`](https://clement-poupelin.github.io/vernissage/reference/vernissage-deprecated.md),
 [`paired_visits_plot()`](https://clement-poupelin.github.io/vernissage/reference/vernissage-deprecated.md),
 [`radar_plot()`](https://clement-poupelin.github.io/vernissage/reference/vernissage-deprecated.md)…)
-still work: they call the new function and give a deprecation warning.
-The correspondence table is in `?vernissage-deprecated` and in
-`NEWS.md`. The former limit-of-detection and cut-off functions
-(`handle_lod()`, `make_cuts()`, `binarize_vars()`…) are in lodestar.
-
-## Renaming the package
-
-From a terminal at the package root (on macOS use `sed -i ''`):
-
-``` sh
-grep -rl "vernissage" --exclude-dir=.git . | xargs sed -i 's/vernissage/newname/g'
-git mv R/vernissage-package.R R/newname-package.R
-git mv vignettes/vernissage.qmd vignettes/newname.qmd
-git mv vernissage.Rproj newname.Rproj
-```
-
-Check the result with `git diff`, rename the GitHub repository
-(*Settings \> General*; GitHub redirects the old address), update the
-remote
-(`git remote set-url origin https://github.com/Clement-Poupelin/newname.git`)
-and run `devtools::document()` and `devtools::check()`.
-
-## License
-
-MIT
+still work, with a deprecation warning; see `?vernissage-deprecated`.
+The former limit-of-detection and cut-off functions are in
+[lodestar](https://github.com/Clement-Poupelin/lodestar).
