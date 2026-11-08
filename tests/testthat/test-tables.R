@@ -33,7 +33,7 @@ test_that("describe_cohort gt output", {
   expect_s3_class(g, "gt_tbl")
   html <- gt::as_raw_html(g)
   expect_match(html, "Cohort overview")
-  expect_match(html, "Placebo \\(n = ")
+  expect_match(html, "Placebo<br>\\(n = ")
 })
 
 test_that("gt_pub formats numbers and p-values", {

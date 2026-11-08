@@ -128,7 +128,12 @@ plot_paired_visits <- function(data, vars, id_col, visits = c("V0", "V3"), label
     seg <- tidyr::pivot_longer(tibble::tibble(Facet = factor(st$Facet, levels = levels(long$Facet)), t0 = st$t0, t1 = st$t1),
                                c("t0", "t1"), names_to = "k", values_to = "thr")
     seg$xpos <- ifelse(seg$k == "t0", 1, 2)
-    p <- p + ggplot2::geom_line(ggplot2::aes(group = id, colour = Transition), alpha = 0.7, linewidth = 0.4) +
+    # subjects changing side drawn last and thicker, so that they are not hidden by the others
+    moved <- long$high0 != long$high1
+    p <- p + ggplot2::geom_line(data = long[!moved, , drop = FALSE], ggplot2::aes(group = id, colour = Transition),
+                                alpha = 0.6, linewidth = 0.35) +
+      ggplot2::geom_line(data = long[moved, , drop = FALSE], ggplot2::aes(group = id, colour = Transition),
+                         alpha = 0.95, linewidth = 0.8) +
       ggplot2::geom_point(ggplot2::aes(colour = Transition), size = 0.9, alpha = 0.6) +
       ggplot2::geom_boxplot(ggplot2::aes(fill = Visit), width = 0.3, alpha = 0.35, outlier.shape = NA) +
       ggplot2::geom_segment(data = seg, ggplot2::aes(x = xpos - 0.3, xend = xpos + 0.3, y = thr, yend = thr),

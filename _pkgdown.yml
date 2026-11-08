@@ -5,7 +5,7 @@ template:
   opengraph:
     image:
       src: man/figures/logo.png
-      alt: "lodestar hex logo"
+      alt: "vernissage hex logo"
 
 authors:
   Clément Poupelin:

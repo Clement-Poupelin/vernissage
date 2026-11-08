@@ -88,7 +88,7 @@
 #' @param grid_label_fmt Function formatting the grid levels (`NULL`:
 #'   automatic, %, SD for `"zscore"`, percentiles for `"rank"`).
 #' @param grid_label_angle Angle where the grid levels are printed (default:
-#'   `start_angle`).
+#'   halfway between the first two axes).
 #' @param grid_label_size,grid_label_colour Style of the grid levels.
 #' @param palette Palette of the groups (see [pal_levels()]); default
 #'   `"okabe"`.
@@ -110,7 +110,8 @@
 #' @param title,subtitle Titles.
 #' @param caption `NULL` = automatic caption (tests and CI), `FALSE` = none,
 #'   or a text.
-#' @param legend_title Title of the legend (default: name of `group`).
+#' @param legend_title Title of the legend (default: label of `group` in
+#'   `labels`, else its name).
 #' @param legend_position `"bottom"`, `"right"`, `"top"`, `"left"` or
 #'   `"none"`.
 #' @param legend_nrow Number of rows of the legend.
@@ -208,7 +209,9 @@ plot_radar <- function(
   grp_names <- levels(g)
   k <- length(grp_names)
   if (is.null(show_legend)) show_legend <- k > 1
-  if (is.null(legend_title)) legend_title <- group %||% ""
+  if (is.null(legend_title)) {
+    legend_title <- if (is.null(group)) "" else if (!is.null(names(labels)) && group %in% names(labels)) labels[[group]] else group
+  }
 
   # 2. axes (numeric -> 1 axis; categorical -> 1 axis per level)
   axes <- list()
@@ -490,7 +493,8 @@ plot_radar <- function(
                        hj = ifelse(abs(cx) < 0.15, 0.5, ifelse(cx > 0, 0, 1)),
                        vj = ifelse(abs(sy) < 0.15, 0.5, ifelse(sy > 0, 0, 1)))
   if (show_grid_labels) {
-    ga <- (grid_label_angle %||% start_angle) * pi / 180
+    # default: halfway between the first two axes, away from the profiles drawn on the spokes
+    ga <- (grid_label_angle %||% (start_angle + (if (clockwise) -1 else 1) * 180 / n_ax)) * pi / 180
     gl_lv <- grid_levels[grid_levels > 0]
     grid_lab <- data.frame(x = rad(gl_lv) * cos(ga) + 0.015, y = rad(gl_lv) * sin(ga), label = grid_label_fmt(gl_lv))
   }

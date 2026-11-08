@@ -164,6 +164,14 @@ plot_distribution <- function(data, vars = NULL, group = NULL, metadata = NULL, 
   grp_lab <- if (has_group) label_get(group, labels) else NULL
   jitter <- function(h) ggplot2::position_jitter(width = 0, height = h, seed = seed)
 
+  # type of each panel, known in advance: with numeric panels, the bar panels do not draw
+  # their own group legend (patchwork would show it twice)
+  panel_type <- vapply(vars, function(v) {
+    tp <- if (!is.null(names(type))) { if (v %in% names(type)) type[[v]] else "auto" } else type[1]
+    .resolve_type(df[[v]], tp, discrete_max)
+  }, character(1))
+  bar_guide <- if (any(panel_type != "bar")) "none" else .fill_guide()
+
   one_var <- function(v) {
     lab <- label_get(v, labels)
     x_raw <- df[[v]]
@@ -189,13 +197,13 @@ plot_distribution <- function(data, vars = NULL, group = NULL, metadata = NULL, 
           ggplot2::geom_text(ggplot2::aes(label = sprintf("%d\n(%.0f%%)", n, pct), group = .group),
                              position = ggplot2::position_dodge(0.85), vjust = -0.2,
                              size = base_size / 4, lineheight = 0.85) +
-          ggplot2::scale_fill_manual(values = pal, name = grp_lab, guide = .fill_guide())
+          ggplot2::scale_fill_manual(values = pal, name = grp_lab, guide = bar_guide)
       } else {
         p + ggplot2::geom_col(fill = fill_color, width = 0.7, alpha = 0.85) +
           ggplot2::geom_text(ggplot2::aes(label = sprintf("%d (%.0f%%)", n, pct)), vjust = -0.4, size = base_size / 4)
       }
       sub <- .u(paste0("N = ", nrow(d), if (n_na) paste0(" (missing = ", n_na, ")") else "",
-                    if (!is.null(tst)) sprintf("  |  %s p = %s %s", tst$name, fmt_p(tst$p), fmt_stars(tst$p)) else ""))
+                    if (!is.null(tst)) sprintf("\n%s p = %s %s", tst$name, fmt_p(tst$p), fmt_stars(tst$p)) else ""))
       return(p + ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0, 0.25))) +
                ggplot2::labs(x = NULL, y = "Count", subtitle = sub) + th())
     }
@@ -283,11 +291,11 @@ plot_distribution <- function(data, vars = NULL, group = NULL, metadata = NULL, 
         out_scale()
     }
     parts <- paste0("N = ", nrow(d), if (n_na) paste0(" (missing = ", n_na, ")") else "")
-    if (outlier_mad) parts <- c(parts, sprintf("MAD: %d", sum(d$is_mad)))
-    if (outlier_iqr) parts <- c(parts, sprintf("IQR: %d", sum(d$is_iqr)))
+    out_txt <- c(if (outlier_mad) sprintf("MAD: %d", sum(d$is_mad)), if (outlier_iqr) sprintf("IQR: %d", sum(d$is_iqr)))
+    if (length(out_txt)) parts <- paste(c(parts, out_txt), collapse = "  |  ")
     if (!is.null(tst)) parts <- c(parts, sprintf("%s p = %s %s", tst$name, fmt_p(tst$p), fmt_stars(tst$p)))
     p <- p + ggplot2::coord_cartesian(xlim = xr) +
-      ggplot2::labs(x = if (show_box) NULL else xlab, y = ylab, subtitle = .u(paste(parts, collapse = "  |  "))) + th()
+      ggplot2::labs(x = if (show_box) NULL else xlab, y = ylab, subtitle = .u(paste(parts, collapse = "\n"))) + th()
     if (!show_box) return(p)
     p <- p + ggplot2::theme(axis.text.x = ggplot2::element_blank(), axis.ticks.x = ggplot2::element_blank())
 
@@ -311,6 +319,7 @@ plot_distribution <- function(data, vars = NULL, group = NULL, metadata = NULL, 
     b <- b + ggplot2::coord_flip(ylim = xr) + ggplot2::labs(x = NULL, y = xlab) + th() +
       ggplot2::theme(axis.text.y = if (has_group) ggplot2::element_text(size = base_size - 2) else ggplot2::element_blank(),
                      axis.ticks.y = ggplot2::element_blank())
+    # explicit call rather than `p / b`: the operator has a method only once patchwork is loaded
     patchwork::wrap_plots(p, b, ncol = 1, heights = heights)
   }
 

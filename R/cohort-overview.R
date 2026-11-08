@@ -109,11 +109,15 @@ describe_cohort <- function(data, vars = NULL, by = NULL, id_col = NULL, blocks 
   tb <- gt::tab_header(tb, title = gt::md(paste0("**", title, "**")), subtitle = sub)
   if (length(grp_cols)) {
     n_by <- table(grp)
-    lab_by <- stats::setNames(sprintf("%s (n = %d)", grp_cols, as.integer(n_by[grp_cols])), grp_cols)
-    tb <- gt::cols_label(tb, .list = as.list(lab_by))
+    lab_by <- lapply(stats::setNames(grp_cols, grp_cols),
+                     function(g) gt::html(sprintf("%s<br>(n = %d)", g, as.integer(n_by[[g]]))))
+    tb <- gt::cols_label(tb, .list = lab_by)
     tb <- gt::tab_spanner(tb, label = label_get(by, labels), columns = dplyr::all_of(grp_cols))
   }
-  tb <- gt::cols_label(tb, Overall = sprintf("Overall (n = %d)", n))
+  tb <- gt::cols_label(tb, Overall = gt::html(sprintf("Overall<br>(n = %d)", n)))
+  # summaries kept on one line ("13.0 [8.4; 17.3]"), the table scrolls instead of wrapping
+  tb <- gt::tab_style(tb, gt::cell_text(whitespace = "nowrap"),
+                      gt::cells_body(columns = dplyr::any_of(c("Overall", "Range", grp_cols))))
   tb <- gt::sub_missing(tb, columns = "N", missing_text = "")
   if ("p" %in% shown) {
     tb <- gt::fmt(tb, columns = "p", fns = function(x) ifelse(is.na(x), "", fmt_p(x)))

@@ -119,8 +119,8 @@ plot_na_map <- function(data, vars = NULL, id_col = NULL, labels = NULL, group =
   pct <- 100 * cnt / n
   row_na <- rowSums(na_mat)
   base_lab <- label_get(vars, labels)
-  vlab <- if (!show_pct) base_lab else if (vert) sprintf("%s  %d (%.0f%%)", base_lab, cnt, pct) else
-    sprintf("%s\n%d (%.0f%%)", base_lab, cnt, pct)
+  # one line: two-line labels overlap once rotated
+  vlab <- if (!show_pct) base_lab else sprintf("%s  %d (%.0f%%)", base_lab, cnt, pct)
   ord_v <- if (sort_vars) order(-pct) else seq_along(vars)
   ord_r <- if (sort_rows) order(row_na, decreasing = TRUE) else seq_len(n)
   lev_v <- if (vert) rev(vlab[ord_v]) else vlab[ord_v]
@@ -164,7 +164,7 @@ plot_na_map <- function(data, vars = NULL, id_col = NULL, labels = NULL, group =
 
   sub <- subtitle %||% sprintf("%d individuals x %d variables | %.1f%% missing | %d complete individuals (%.0f%%)%s",
                                n, length(vars), 100 * mean(na_mat), sum(row_na == 0), 100 * mean(row_na == 0),
-                               if (sort_rows) " | individuals sorted by number of missing values" else "")
+                               if (sort_rows) "\nIndividuals sorted by number of missing values" else "")
   cap <- if (show_pct) "Variable labels: number (%) of missing values" else NULL
   title_theme <- ggplot2::theme(plot.title = ggplot2::element_text(size = ggplot2::rel(title_size), face = "bold"),
                                 plot.subtitle = ggplot2::element_text(size = ggplot2::rel(1.05)))
